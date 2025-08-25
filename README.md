@@ -1,5 +1,61 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Database Setup with Drizzle ORM
+
+This project uses [Drizzle ORM](https://orm.drizzle.team/) with PostgreSQL for database management.
+
+### Setup Instructions
+
+1. **Environment Variables**
+   Copy `.env.example` to `.env.local` and update with your database credentials:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. **Database Connection**
+   Update `DATABASE_URL` in `.env.local` with your PostgreSQL connection string:
+   ```
+   DATABASE_URL="postgresql://username:password@localhost:5432/database_name"
+   ```
+
+3. **Generate Migrations**
+   When you modify the schema in `db/schema.ts`, generate migrations:
+   ```bash
+   pnpm db:generate
+   ```
+
+4. **Run Migrations**
+   Apply migrations to your database:
+   ```bash
+   pnpm db:migrate
+   ```
+
+5. **Database Studio**
+   View and edit your data with Drizzle Studio:
+   ```bash
+   pnpm db:studio
+   ```
+
+### Available Database Scripts
+
+- `pnpm db:generate` - Generate migration files from schema changes
+- `pnpm db:migrate` - Apply migrations to the database
+- `pnpm db:push` - Push schema changes directly to database (development only)
+- `pnpm db:studio` - Open Drizzle Studio
+- `pnpm db:drop` - Drop migration files
+
+### Project Structure
+
+```
+├── db/
+│   └── schema.ts          # Database schema definitions
+├── lib/
+│   └── drizzle.ts         # Database connection and configuration
+├── drizzle/               # Generated migration files
+├── drizzle.config.ts      # Drizzle Kit configuration
+└── migrate.ts             # Migration runner script
+```
+
 ## Getting Started
 
 First, run the development server:
