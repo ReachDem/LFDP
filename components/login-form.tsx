@@ -27,7 +27,7 @@ export default function LoginPage() {
 			await authClient.signIn.email({
 				email,
 				password,
-				callbackURL: '/dashboard'
+				callbackURL: '/home'
 			});
 		} catch (err: unknown) {
 			setError(err instanceof Error ? err.message : 'La connexion a échoué');

@@ -5,6 +5,7 @@ export default function page() {
   return (
     <main>
         <LoginPage />
+        
     </main>
   )
 }
