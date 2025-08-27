@@ -136,7 +136,7 @@ export function SignUpForm({
 								</Button>
 							</div>
 							<div className="text-center text-sm">
-								Vous avez deja un compte ?{" "}
+								Vous avez déjà un compte ?{" "}
 								<a href="/login" className="underline underline-offset-4">
 									Connectez-vous
 								</a>
