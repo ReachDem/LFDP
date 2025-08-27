@@ -64,7 +64,7 @@ export function SignUpForm({
 							<div className="flex flex-col items-center text-center">
 								<h1 className="text-2xl font-bold">Bienvenue.</h1>
 								<p className="text-muted-foreground text-balance">
-									Creer un compte administrateur.
+									Créer un compte administrateur.
 								</p>
 							</div>
 
