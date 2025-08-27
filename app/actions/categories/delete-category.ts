@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { stores } from "@/db/schema";
+import { headers } from "next/headers";
 
 export type DeleteCategoryParams = {
   id: string;
@@ -19,13 +20,19 @@ export type DeleteCategoryResult = {
 
 export async function deleteCategory(params: DeleteCategoryParams): Promise<DeleteCategoryResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     const { id, storeId } = params;
     

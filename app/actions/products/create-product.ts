@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { stores } from "@/db/schema";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { Product } from "@/types/store";
 
 export type CreateProductFormData = {
@@ -28,13 +29,19 @@ export type CreateProductResult = {
 
 export async function createProduct(formData: CreateProductFormData): Promise<CreateProductResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     const { 
       name, 
@@ -92,7 +99,7 @@ export async function createProduct(formData: CreateProductFormData): Promise<Cr
       .values({
         name,
         description,
-        price,
+        price: price.toString(), // Conversion de number en string pour le decimal
         stockQuantity,
         alertThreshold,
         categoryId,

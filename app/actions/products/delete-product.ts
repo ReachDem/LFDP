@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { stores } from "@/db/schema";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 export type DeleteProductParams = {
   id: string;
@@ -19,13 +20,19 @@ export type DeleteProductResult = {
 
 export async function deleteProduct({ id, storeId }: DeleteProductParams): Promise<DeleteProductResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     // Verify the store exists and belongs to the user
     const store = await db.query.stores.findFirst({

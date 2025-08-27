@@ -7,6 +7,7 @@ import { and, eq } from "drizzle-orm";
 import { stores } from "@/db/schema";
 import { Category } from "@/types/store";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 // Re-export utility functions that could be shared across actions
 export * from './create-category';
@@ -29,13 +30,19 @@ export type GetCategoriesResult = {
 
 export async function getCategories({ storeId }: GetCategoriesParams): Promise<GetCategoriesResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     // Verify the store exists and belongs to the user
     const store = await db.query.stores.findFirst({
@@ -84,13 +91,19 @@ export type GetCategoryResult = {
 
 export async function getCategory({ id, storeId }: GetCategoryParams): Promise<GetCategoryResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     // Verify the store exists and belongs to the user
     const store = await db.query.stores.findFirst({

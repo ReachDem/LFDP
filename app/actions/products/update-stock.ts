@@ -1,11 +1,12 @@
 'use server';
 
-import { db } from "@/lib/db";
+import { db } from "@/lib/drizzle";
 import { products } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { stores } from "@/db/schema";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { Product } from "@/types/store";
 
 export type UpdateStockParams = {
@@ -22,13 +23,19 @@ export type UpdateStockResult = {
 
 export async function updateStock({ id, storeId, quantity }: UpdateStockParams): Promise<UpdateStockResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     // Verify the store exists and belongs to the user
     const store = await db.query.stores.findFirst({

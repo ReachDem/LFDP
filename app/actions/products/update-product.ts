@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { stores } from "@/db/schema";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { Product } from "@/types/store";
 
 export type UpdateProductFormData = {
@@ -29,13 +30,19 @@ export type UpdateProductResult = {
 
 export async function updateProduct(formData: UpdateProductFormData): Promise<UpdateProductResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     const { 
       id,
@@ -93,7 +100,14 @@ export async function updateProduct(formData: UpdateProductFormData): Promise<Up
     // Update the product
     const updatedProduct = await db.update(products)
       .set({
-        ...updateData,
+        ...(updateData.name !== undefined ? { name: updateData.name } : {}),
+        ...(updateData.description !== undefined ? { description: updateData.description } : {}),
+        ...(updateData.price !== undefined ? { price: updateData.price.toString() } : {}),
+        ...(updateData.stockQuantity !== undefined ? { stockQuantity: updateData.stockQuantity } : {}),
+        ...(updateData.alertThreshold !== undefined ? { alertThreshold: updateData.alertThreshold } : {}),
+        ...(updateData.categoryId !== undefined ? { categoryId: updateData.categoryId } : {}),
+        ...(updateData.imageUrl !== undefined ? { imageUrl: updateData.imageUrl } : {}),
+        ...(updateData.isPublished !== undefined ? { isPublished: updateData.isPublished } : {}),
         updatedAt: new Date()
       })
       .where(and(

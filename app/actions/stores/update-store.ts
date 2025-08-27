@@ -5,6 +5,7 @@ import { stores } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { Store } from "@/types/store";
 
 export type UpdateStoreFormData = {
@@ -28,13 +29,19 @@ export type UpdateStoreResult = {
 
 export async function updateStore(formData: UpdateStoreFormData): Promise<UpdateStoreResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     const { id, ...updateData } = formData;
     

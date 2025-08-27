@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { stores } from "@/db/schema";
+import { headers } from "next/headers";
 import { Category } from "@/types/store";
 
 export type CreateCategoryFormData = {
@@ -21,13 +22,19 @@ export type CreateCategoryResult = {
 
 export async function createCategory(formData: CreateCategoryFormData): Promise<CreateCategoryResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     const { name, storeId } = formData;
     

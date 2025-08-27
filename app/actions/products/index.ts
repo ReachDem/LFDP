@@ -7,6 +7,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { stores } from "@/db/schema";
 import { Product } from "@/types/store";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 // Re-export utility functions that could be shared across actions
 export * from './create-product';
@@ -31,13 +32,19 @@ export type GetProductsResult = {
 
 export async function getProducts({ storeId, categoryId }: GetProductsParams): Promise<GetProductsResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     // Verify the store exists and belongs to the user
     const store = await db.query.stores.findFirst({
@@ -100,13 +107,19 @@ export type GetProductResult = {
 
 export async function getProduct({ id, storeId }: GetProductParams): Promise<GetProductResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     // Verify the store exists and belongs to the user
     const store = await db.query.stores.findFirst({
@@ -167,13 +180,19 @@ export type GetLowStockProductsResult = {
 
 export async function getLowStockProducts({ storeId }: GetLowStockProductsParams): Promise<GetLowStockProductsResult> {
   try {
-    const session = await auth.validateSession();
-    if (!session) {
+    const sessionData = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!sessionData) {
       return { 
         success: false, 
         error: "Unauthorized. Please sign in." 
       };
     }
+    
+    // Cast the session to the expected type
+    const session = sessionData as { user: { id: string } };
 
     // Verify the store exists and belongs to the user
     const store = await db.query.stores.findFirst({
