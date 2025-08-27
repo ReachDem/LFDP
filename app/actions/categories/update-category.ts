@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from "@/lib/db";
+import { db } from "@/lib/drizzle";
 import { categories } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
